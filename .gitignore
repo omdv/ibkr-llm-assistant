@@ -28,6 +28,3 @@ data/
 prompts/
 *.db
 *.db-journal
-
-# Ignore docker requirements
-requirements.txt
