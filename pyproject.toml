@@ -1,0 +1,67 @@
+[project]
+name = "ibkr-mcp-server"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+  "anthropic>=0.49.0",
+  "apscheduler>=3.11.0",
+  "bs4>=0.0.2",
+  "croniter>=6.0.0",
+  "defusedxml>=0.7.1",
+  "exchange-calendars>=4.10",
+  "fastapi>=0.115.12",
+  "fastmcp>=2.2.7",
+  "gunicorn>=21.2.0",
+  "httpx>=0.28.1",
+  "ib-async>=1.0.3",
+  "jinja2>=3.1.6",
+  "loguru>=0.7.3",
+  "mcp[cli]>=1.7.0",
+  "pandas>=2.2.3",
+  "pydantic-settings>=2.9.1",
+  "python-telegram-bot>=22.0",
+  "rich>=14.0.0",
+  "sqlalchemy>=2.0.41",
+  "textual>=3.2.0",
+  "asyncpg>=0.30.0",
+  "psycopg2-binary>=2.9.10",
+]
+
+[tool.pre-commit]
+hooks = [
+  { id = "pre-commit", entry = "pre-commit run --all-files" },
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+indent-width = 2
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "I001",
+  "G004",
+  "INP001",
+  "S603",
+  "S301",
+  "PLR2004",
+  "F403",
+  "E402", # module level import not at top of file
+  "BLE001", # blind exceptions
+]
+
+# Formatter settings
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[dependency-groups]
+dev = [
+  "pytest-asyncio>=0.26.0",
+  "pytest>=8.3.5",
+  "ruff>=0.11.6",
+]

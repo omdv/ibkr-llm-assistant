@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Schedules - IBKR Assistant{% endblock %}
+
+{% block content %}
+  <!-- Create Schedule Form -->
+  <div class="bg-white shadow sm:rounded-lg mb-6">
+    <div class="px-4 py-5 sm:p-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">Create New Schedule</h3>
+      <form action="/schedules/" method="POST" class="mt-5 space-y-4">
+        <div>
+          <label for="prompt_id" class="block text-sm font-medium text-gray-700">Prompt</label>
+          <select
+            id="prompt_id"
+            name="prompt_id"
+            required
+            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+          >
+            <option value="">Select a prompt</option>
+            {% for prompt in prompts %}
+            <option value="{{ prompt.id }}" {% if selected_prompt_id == prompt.id %}selected{% endif %}>
+              {{ prompt.content[:50] }}{% if prompt.content|length > 50 %}...{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label for="schedule_type" class="block text-sm font-medium text-gray-700">Schedule Type</label>
+          <select
+            id="schedule_type"
+            name="schedule_type"
+            required
+            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            onchange="toggleScheduleFields(this.value)"
+          >
+            <option value="one_time">One Time</option>
+            <option value="recurring">Recurring</option>
+          </select>
+        </div>
+
+        <div id="one-time-fields" class="hidden">
+          <div class="mt-4">
+            <label for="run_at" class="block text-sm font-medium text-gray-700">Run At (Your Local Time)</label>
+            <input type="datetime-local" name="run_at" id="run_at" required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div id="recurring-fields" class="hidden">
+          <label for="cron_expression" class="block text-sm font-medium text-gray-700">Cron Expression</label>
+          <div class="mt-1">
+            <select
+              id="cron_preset"
+              class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+              onchange="updateCronExpression(this.value)"
+            >
+              <option value="">Select a preset or enter custom...</option>
+              <option value="*/2 * * * *">Every 2 minutes</option>
+              <option value="*/5 * * * *">Every 5 minutes</option>
+              <option value="*/15 * * * *">Every 15 minutes</option>
+              <option value="0 * * * *">Every hour</option>
+              <option value="0 0 * * *">Every day at midnight</option>
+              <option value="0 0 * * 1">Every Monday at midnight</option>
+              <option value="custom">Custom...</option>
+            </select>
+          </div>
+          <div class="mt-2">
+            <input
+              type="text"
+              id="cron_expression"
+              name="cron_expression"
+              placeholder="* * * * *"
+              class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+            >
+          </div>
+          <p class="mt-1 text-sm text-gray-500">Format: minute hour day month day-of-week</p>
+          <p class="mt-1 text-sm text-gray-500">Examples: */2 * * * * (every 2 minutes), 0 * * * * (every hour)</p>
+        </div>
+
+        <div class="mt-5">
+          <button
+            type="submit"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Create Schedule
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Schedules List -->
+  <div class="bg-white shadow overflow-hidden sm:rounded-md">
+    <ul role="list" class="divide-y divide-gray-200">
+      {% for schedule in schedules %}
+      <li>
+        <div class="px-4 py-4 sm:px-6">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-medium text-indigo-600 truncate">
+              Schedule #{{ schedule.id }}
+            </p>
+            <div class="ml-2 flex-shrink-0 flex space-x-4">
+              <a
+                href="/schedules/{{ schedule.id }}/executions"
+                class="font-medium text-indigo-600 hover:text-indigo-500"
+              >
+                View History
+              </a>
+              <form action="/schedules/{{ schedule.id }}/delete" method="POST" class="inline">
+                <button
+                  type="submit"
+                  class="font-medium text-red-600 hover:text-red-500"
+                  onclick="return confirm('Are you sure you want to delete this schedule?')"
+                >
+                  Delete
+                </button>
+              </form>
+            </div>
+          </div>
+          <div class="mt-2 sm:flex sm:justify-between">
+            <div class="sm:flex">
+              <p class="flex items-center text-sm text-gray-500">
+                Prompt: {{ schedule.prompt.content[:50] }}{% if schedule.prompt.content|length > 50 %}...{% endif %}
+              </p>
+            </div>
+            <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+              <p>
+                Type: {{ schedule.schedule_type }}
+                {% if schedule.schedule_type == 'one_time' %}
+                  (Run at: <span class="local-time" data-utc="{{ schedule.run_at.strftime('%Y-%m-%dT%H:%M:%SZ') if schedule.run_at else '' }}">
+                    {{ schedule.run_at.strftime('%Y-%m-%d %H:%M:%S') if schedule.run_at else 'N/A' }}
+                  </span>)
+                {% else %}
+                  (Cron: {{ schedule.cron_expression }})
+                {% endif %}
+              </p>
+            </div>
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Convert UTC times to local timezone
+  document.querySelectorAll('.local-time').forEach(element => {
+    const utcTime = element.dataset.utc;
+    if (utcTime) {
+      const date = new Date(utcTime);
+      element.textContent = date.toLocaleString();
+    }
+  });
+
+  function toggleScheduleFields(scheduleType) {
+    const oneTimeFields = document.getElementById('one-time-fields');
+    const recurringFields = document.getElementById('recurring-fields');
+
+    if (scheduleType === 'one_time') {
+      oneTimeFields.classList.remove('hidden');
+      recurringFields.classList.add('hidden');
+      document.getElementById('cron_expression').required = false;
+      document.getElementById('run_at').required = true;
+    } else {
+      oneTimeFields.classList.add('hidden');
+      recurringFields.classList.remove('hidden');
+      document.getElementById('cron_expression').required = true;
+      document.getElementById('run_at').required = false;
+    }
+  }
+
+  function updateCronExpression(preset) {
+    const cronInput = document.getElementById('cron_expression');
+    if (preset && preset !== 'custom') {
+      cronInput.value = preset;
+      cronInput.readOnly = true;
+    } else {
+      cronInput.value = '';
+      cronInput.readOnly = false;
+    }
+  }
+
+  // Initialize fields on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    toggleScheduleFields(document.getElementById('schedule_type').value);
+  });
+
+  // Convert local time to UTC before form submission
+  document.querySelector('form').addEventListener('submit', function(e) {
+    const runAtInput = document.getElementById('run_at');
+    if (runAtInput.value) {
+      // Create date from local input (browser assumes local time)
+      const localDate = new Date(runAtInput.value);
+      // Convert to UTC ISO string and take just the date-time part
+      runAtInput.value = localDate.toISOString().slice(0, 16);
+    }
+  });
+</script>
+{% endblock %}

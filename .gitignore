@@ -1,0 +1,33 @@
+.vscode
+.venv
+__pycache__/
+.python-version
+.pytest_cache/
+
+# Logs
+logs/
+
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
+.ruff_cache/
+
+# test script
+_testing.py
+.aider*
+.env
+
+# Data
+data/
+prompts/
+*.db
+*.db-journal
+
+# Ignore docker requirements
+requirements.txt

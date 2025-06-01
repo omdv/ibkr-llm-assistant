@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Executions - IBKR Assistant{% endblock %}
+
+{% block content %}
+  <div class="px-4 py-5 sm:px-6">
+    <h1 class="text-2xl font-bold text-gray-900">Executions</h1>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white shadow rounded-lg p-6 mb-6">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Prompt Filter -->
+      <div>
+        <label for="prompt_id" class="block text-sm font-medium text-gray-700">Prompt</label>
+        <select name="prompt_id" id="prompt_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+          <option value="">All Prompts</option>
+          {% for prompt in prompts %}
+          <option value="{{ prompt.id }}" {% if current_prompt_id == prompt.id %}selected{% endif %}>
+            {{ prompt.content[:50] }}{% if prompt.content|length > 50 %}...{% endif %}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Status Filter -->
+      <div>
+        <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+        <select name="status" id="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+          <option value="">All Statuses</option>
+          {% for status in statuses %}
+          <option value="{{ status }}" {% if current_status == status %}selected{% endif %}>
+            {{ status }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Date Range -->
+      <div>
+        <label for="start_date" class="block text-sm font-medium text-gray-700">Start Date</label>
+        <input type="datetime-local" name="start_date" id="start_date" value="{{ current_start_date }}"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+      </div>
+
+      <div>
+        <label for="end_date" class="block text-sm font-medium text-gray-700">End Date</label>
+        <input type="datetime-local" name="end_date" id="end_date" value="{{ current_end_date }}"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+      </div>
+
+      <!-- Sort Controls -->
+      <div>
+        <label for="sort_by" class="block text-sm font-medium text-gray-700">Sort By</label>
+        <select name="sort_by" id="sort_by" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+          <option value="executed_at" {% if current_sort_by == 'executed_at' %}selected{% endif %}>Execution Time</option>
+          <option value="status" {% if current_sort_by == 'status' %}selected{% endif %}>Status</option>
+          <option value="prompt_id" {% if current_sort_by == 'prompt_id' %}selected{% endif %}>Prompt</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="sort_order" class="block text-sm font-medium text-gray-700">Sort Order</label>
+        <select name="sort_order" id="sort_order" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+          <option value="desc" {% if current_sort_order == 'desc' %}selected{% endif %}>Descending</option>
+          <option value="asc" {% if current_sort_order == 'asc' %}selected{% endif %}>Ascending</option>
+        </select>
+      </div>
+
+      <!-- Filter Buttons -->
+      <div class="md:col-span-2 lg:col-span-4 flex justify-end space-x-4">
+        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          Apply Filters
+        </button>
+        <a href="/executions" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          Clear Filters
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Executions Table -->
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200 table-fixed">
+      <thead class="bg-gray-50">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Execution Time</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prompt</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Schedule</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Result</th>
+          <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        {% for execution in executions %}
+        <tr>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <a href="/executions/{{ execution.id }}" class="text-indigo-600 hover:text-indigo-900">
+              <span class="local-time" data-utc="{{ execution.executed_at.strftime('%Y-%m-%dT%H:%M:%SZ') if execution.executed_at else '' }}">
+                {{ execution.executed_at.strftime('%Y-%m-%d %H:%M:%S') if execution.executed_at else 'N/A' }}
+              </span>
+            </a>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            {% if execution.prompt %}
+              <a href="/prompts/{{ execution.prompt.id }}" class="text-indigo-600 hover:text-indigo-900">
+                Prompt #{{ execution.prompt.id }}: {{ execution.prompt.content[:50] }}{% if execution.prompt.content|length > 50 %}...{% endif %}
+              </a>
+            {% else %}
+              <span class="text-gray-500">Prompt deleted</span>
+            {% endif %}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            {% if execution.schedule %}
+              {% if execution.schedule.schedule_type == 'one_time' %}
+                One-time: <span class="local-time" data-utc="{{ execution.schedule.run_at.strftime('%Y-%m-%dT%H:%M:%SZ') if execution.schedule.run_at else '' }}">
+                  {{ execution.schedule.run_at.strftime('%Y-%m-%d %H:%M:%S') if execution.schedule.run_at else 'N/A' }}
+                </span>
+              {% else %}
+                Recurring: {{ execution.schedule.cron_expression }}
+              {% endif %}
+            {% else %}
+              <span class="text-gray-500">Manual</span>
+            {% endif %}
+          </td>
+          <td class="px-6 py-4 text-sm text-gray-500">
+            <div class="max-w-xs truncate">
+              <a href="/executions/{{ execution.id }}" class="text-indigo-600 hover:text-indigo-900">
+                {{ execution.result or 'N/A' }}
+              </a>
+            </div>
+          </td>
+          <td class="px-4 py-4 whitespace-nowrap">
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+              {% if execution.status == 'success' %}
+                bg-green-100 text-green-800
+              {% elif execution.status == 'error' %}
+                bg-red-100 text-red-800
+              {% elif execution.status == 'pending' %}
+                bg-yellow-100 text-yellow-800
+              {% else %}
+                bg-gray-100 text-gray-800
+              {% endif %}">
+              {{ execution.status }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Convert UTC times to local timezone
+    document.querySelectorAll('.local-time').forEach(element => {
+      const utcTime = element.dataset.utc;
+      if (utcTime) {
+        const date = new Date(utcTime);
+        element.textContent = date.toLocaleString();
+      }
+    });
+  </script>
+{% endblock %}

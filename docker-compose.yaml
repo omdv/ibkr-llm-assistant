@@ -1,0 +1,54 @@
+---
+services:
+
+  ib-gateway:
+    image: ghcr.io/extrange/ibkr:stable
+    ports:
+      - "127.0.0.1:6080:6080" # noVNC browser access
+      - "127.0.0.1:8888:8888" # API access
+      - "127.0.0.1:7462:7462" # IBC Command Server
+    ulimits:
+      nofile: 10000
+    environment:
+      USERNAME: ${LIVE_USER_ID}
+      PASSWORD: ${LIVE_USER_PASS}
+      TWOFA_TIMEOUT_ACTION: restart
+      GATEWAY_OR_TWS: gateway
+      IBC_TradingMode: "live"
+      IBC_ReadOnlyApi: "no"
+      IBC_ReloginAfterSecondFactorAuthenticationTimeout: "yes"
+      IBC_AutoRestartTime: "08:35 AM"
+      IBC_CommandServerPort: "7462"
+      IBC_ControlFrom: "172.18.0.1"
+      IBC_BindAddress: "0.0.0.0"
+    restart: always
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ibkr_mcp
+    ports:
+      - "127.0.0.1:5432:5432"
+    restart: always
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+
+  mcp-server:
+    image: omdv/ibkr-assistant:test
+    ports:
+      - "127.0.0.1:8000:8000"
+    restart: always
+    environment:
+      VERBOSE: true
+      IB_GATEWAY_HOST: ib-gateway
+      IB_GATEWAY_PORT: 8888
+      IB_COMMAND_SERVER_PORT: 7462
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      SERVER_TIMEZONE: ${SERVER_TIMEZONE}
+      QUOTES_API_KEY: ${QUOTES_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_ALLOWED_USER_ID: ${TELEGRAM_ALLOWED_USER_ID}

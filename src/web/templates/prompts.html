@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Prompts - IBKR Assistant{% endblock %}
+
+{% block content %}
+  <!-- Error Message -->
+  {% if error %}
+  <div class="rounded-md bg-red-50 p-4 mb-6">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <h3 class="text-sm font-medium text-red-800">Error</h3>
+        <div class="mt-2 text-sm text-red-700">
+          <p>{{ error }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Create Prompt Form -->
+  <div class="bg-white shadow sm:rounded-lg mb-6">
+    <div class="px-4 py-5 sm:p-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">Create New Prompt</h3>
+      <form action="/prompts/form" method="POST" class="mt-5">
+        <div class="mt-2 max-w-xl text-sm text-gray-500">
+          <textarea
+            name="content"
+            rows="4"
+            class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+            placeholder="Enter your prompt here..."
+            required
+          ></textarea>
+        </div>
+        <div class="mt-5">
+          <button
+            type="submit"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Create Prompt
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Prompts List -->
+  <div class="bg-white shadow overflow-hidden sm:rounded-md">
+    <ul role="list" class="divide-y divide-gray-200">
+      {% for prompt in prompts %}
+      <li>
+        <div class="px-4 py-4 sm:px-6">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-medium text-indigo-600 truncate">
+              <a href="/prompts/{{ prompt.id }}">Prompt #{{ prompt.id }}</a>
+            </p>
+            <div class="ml-2 flex-shrink-0 flex">
+              <form action="/prompts/{{ prompt.id }}/run" method="POST" class="inline mr-4">
+                <button
+                  type="submit"
+                  class="font-medium text-green-600 hover:text-green-500"
+                >
+                  Run once
+                </button>
+              </form>
+              <form action="/prompts/{{ prompt.id }}/delete" method="POST" class="inline">
+                <button
+                  type="submit"
+                  class="font-medium text-red-600 hover:text-red-500"
+                  onclick="return confirm('Are you sure you want to delete this prompt?{% if prompt.schedule_count %} This prompt has {{ prompt.schedule_count }} attached schedule(s). You must delete these schedules first.{% endif %}')"
+                >
+                  Delete
+                </button>
+              </form>
+            </div>
+          </div>
+          <div class="mt-2 sm:flex sm:justify-between">
+            <div class="sm:flex">
+              <p class="flex items-center text-sm text-gray-500">
+                {{ prompt.content }}
+              </p>
+            </div>
+            <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+              <p>
+                Created at <span class="local-time" data-utc="{{ prompt.created_at }}">
+                  {{ prompt.created_at }}
+                </span>
+                {% if prompt.schedule_count %}
+                <span class="ml-2 text-yellow-600">
+                  ({{ prompt.schedule_count }} schedule(s) attached)
+                </span>
+                {% endif %}
+              </p>
+            </div>
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Convert UTC times to local timezone
+  document.querySelectorAll('.local-time').forEach(element => {
+    const utcTime = element.dataset.utc;
+    if (utcTime) {
+      const date = new Date(utcTime);
+      element.textContent = date.toLocaleString();
+    }
+  });
+</script>
+{% endblock %}

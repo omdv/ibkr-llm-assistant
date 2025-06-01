@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Execution #{{ execution.id }} - IBKR Assistant{% endblock %}
+
+{% block content %}
+  <div class="bg-white shadow sm:rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Execution #{{ execution.id }}</h3>
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center">
+            <button id="toolResultsToggle" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 bg-gray-200" role="switch" aria-checked="false">
+              <span class="translate-x-0 pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out" aria-hidden="true">
+                <span class="opacity-100 duration-200 ease-in absolute inset-0 flex h-full w-full items-center justify-center transition-opacity" aria-hidden="true">
+                  <svg class="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 12 12">
+                    <path d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <span class="opacity-0 duration-100 ease-out absolute inset-0 flex h-full w-full items-center justify-center transition-opacity" aria-hidden="true">
+                  {# Example check icon, you might want a different one or none #}
+                  {# <svg class="h-3 w-3 text-blue-600" fill="currentColor" viewBox="0 0 12 12"> #}
+                  {#  <path d="M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z" /> #}
+                  {# </svg> #}
+                </span>
+              </span>
+            </button>
+            <span class="ml-3 text-sm font-medium text-gray-900">Tool Results</span>
+          </div>
+          <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+            {% if execution.status == 'success' %}
+              bg-green-100 text-green-800
+            {% elif execution.status == 'error' %}
+              bg-red-100 text-red-800
+            {% elif execution.status == 'pending' %}
+              bg-yellow-100 text-yellow-800
+            {% else %}
+              bg-gray-100 text-gray-800
+            {% endif %}">
+            {{ execution.status }}
+          </span>
+        </div>
+      </div>
+
+      <div class="mt-5 space-y-6">
+        <div>
+          <h4 class="text-sm font-medium text-gray-500">Execution Details</h4>
+          <div class="mt-2 text-sm text-gray-900">
+            <p>Executed at: {{ execution.executed_at }}</p>
+            {% if execution.schedule and execution.schedule.prompt %}
+            <p class="mt-1">
+              Prompt:
+              <a href="/prompts/{{ execution.schedule.prompt.id }}" class="text-indigo-600 hover:text-indigo-900">
+                Prompt #{{ execution.schedule.prompt.id }}
+              </a>
+            </p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-sm font-medium text-gray-500">Result</h4>
+          <div class="mt-2 bg-gray-50 px-4 py-5 sm:rounded-lg">
+            {% if execution.result %}
+              {% if '[tool][yellow]' in execution.result %}
+                {% set parts = execution.result.split('[tool][yellow]') %}
+                {% for part in parts %}
+                  {% if loop.first and not part.strip() %}
+                    {# This handles the case where execution.result STARTS with [tool][yellow], making parts[0] empty or just whitespace. Skip it. #}
+                  {% elif '[/yellow][/tool]' in part %}
+                    {# Split the part at the FIRST occurrence of the closing tag #}
+                    {% set tool_parts = part.split('[/yellow][/tool]', 1) %}
+                    {# tool_parts[0] is the content INSIDE the tool tags #}
+                    {% if tool_parts[0] and tool_parts[0].strip() %}
+                    <div class="text-blue-600 my-4 tool-content"> {# This is toggled #}
+                      <p class="text-sm">{{ tool_parts[0] | safe }}</p>
+                    </div>
+                    {% endif %}
+                    {# tool_parts[1] is the content AFTER the closing tag (within the current 'part') #}
+                    {% if tool_parts[1] and tool_parts[1].strip() %}
+                      {# This content should ALWAYS be visible and is NOT tool content #}
+                      <pre class="whitespace-pre-wrap text-sm text-gray-900">{{ tool_parts[1] | safe }}</pre> {# NO 'tool-content' class here #}
+                    {% endif %}
+                  {% else %}
+                    {# This 'part' is regular content (e.g., text before the first tool block or if no tool blocks at all) #}
+                    {% if part.strip() %}
+                    <pre class="whitespace-pre-wrap text-sm text-gray-900">{{ part | safe }}</pre> {# NO 'tool-content' class here #}
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+              {% else %}
+                {# No tool tags at all in execution.result #}
+                <pre class="whitespace-pre-wrap text-sm text-gray-900">{{ execution.result | safe }}</pre>
+              {% endif %}
+            {% else %}
+              <p class="text-sm text-gray-500">N/A</p>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if execution.error %}
+        <div>
+          <h4 class="text-sm font-medium text-gray-500">Error</h4>
+          <div class="mt-2 bg-red-50 px-4 py-5 sm:rounded-lg">
+            <pre class="whitespace-pre-wrap text-sm text-red-900">{{ execution.error }}</pre>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const toggleButton = document.getElementById('toolResultsToggle');
+      const toolContents = document.querySelectorAll('.tool-content');
+      let isEnabled = false; // Tool results are initially not shown
+
+      // Function to update toggle visuals
+      function updateToggleVisuals(enabled) {
+        toggleButton.setAttribute('aria-checked', enabled.toString());
+        toggleButton.classList.toggle('bg-blue-600', enabled);
+        toggleButton.classList.toggle('bg-gray-200', !enabled);
+
+        const innerCircle = toggleButton.querySelector('span[aria-hidden="true"] > span'); // The white circle
+        if (innerCircle) {
+            // This refers to the actual circle. The parent span handles translation.
+        }
+
+        const translatingSpan = toggleButton.querySelector('span[aria-hidden="true"]'); // The span that translates
+        if (translatingSpan) {
+            translatingSpan.classList.toggle('translate-x-5', enabled); // 5 * 0.25rem = 1.25rem (check Tailwind config for w-11 and w-5 relation)
+            translatingSpan.classList.toggle('translate-x-0', !enabled);
+        }
+      }
+
+      // Set initial state for content visibility and toggle visuals
+      toolContents.forEach(content => {
+        content.style.display = 'none'; // Hide tool content initially
+      });
+      updateToggleVisuals(false); // Set toggle to off state visually
+
+      toggleButton.addEventListener('click', function() {
+        isEnabled = !isEnabled; // Flip the state
+
+        // Update toggle button visuals
+        updateToggleVisuals(isEnabled);
+
+        // Toggle content visibility
+        toolContents.forEach(content => {
+          content.style.display = isEnabled ? 'block' : 'none';
+        });
+      });
+    });
+  </script>
+{% endblock %}

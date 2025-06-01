@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Prompt #{{ prompt.id }} - IBKR Assistant{% endblock %}
+
+{% block content %}
+  <div class="bg-white shadow sm:rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Prompt #{{ prompt.id }}</h3>
+        <div class="ml-2 flex-shrink-0 flex">
+          <form action="/prompts/{{ prompt.id }}/delete" method="POST" class="inline">
+            <button
+              type="submit"
+              class="font-medium text-red-600 hover:text-red-500"
+              onclick="return confirm('Are you sure you want to delete this prompt?{% if prompt.schedule_count %} This prompt has {{ prompt.schedule_count }} attached schedule(s). You must delete these schedules first.{% endif %}')"
+            >
+              Delete
+            </button>
+          </form>
+        </div>
+      </div>
+      <div class="mt-5">
+        <div class="bg-gray-50 px-4 py-5 sm:rounded-lg">
+          <pre class="whitespace-pre-wrap text-sm text-gray-900">{{ prompt.content }}</pre>
+        </div>
+        <div class="mt-4 text-sm text-gray-500">
+          <p>Created at <span class="local-time" data-utc="{{ prompt.created_at }}">
+            {{ prompt.created_at }}
+          </span></p>
+          {% if prompt.schedule_count %}
+          <p class="mt-1 text-yellow-600">
+            {{ prompt.schedule_count }} schedule(s) attached
+          </p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Convert UTC times to local timezone
+  document.querySelectorAll('.local-time').forEach(element => {
+    const utcTime = element.dataset.utc;
+    if (utcTime) {
+      const date = new Date(utcTime);
+      element.textContent = date.toLocaleString();
+    }
+  });
+</script>
+{% endblock %}
