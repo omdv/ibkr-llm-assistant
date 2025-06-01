@@ -103,7 +103,8 @@ python main.py --cli
 ```
 
 ### Web interface to schedule prompts
-This is intended to be a production-ready trading system. You will need to uncomment all services in the `docker-compose.yaml`.
+This is intended to be a production-ready trading system using the [web interface image](https://github.com/omdv/ibkr-llm-assistant/pkgs/container/ibkr-llm-assistant-web). You will need to uncomment all services in the `docker-compose.yaml` and set up the correct env variables.
+
 
 ### Telegram Approval Bot Setup
 
@@ -122,4 +123,3 @@ Required environment variables:
 |----------|-------------|---------|
 | TELEGRAM_BOT_TOKEN | Bot token from BotFather | - |
 | TELEGRAM_ALLOWED_USER_ID | Your user id | - |
-| TELEGRAM_APPROVAL_TIMEOUT | Timeout in seconds for approval requests | 300 |
