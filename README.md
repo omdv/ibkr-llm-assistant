@@ -20,14 +20,14 @@ Calendar tools:
    - calendar_current_datetime: Get current date and time
    - calendar_get_calendar: Get exchange calendar for specified number of days
 
-Additional tools for quotes (require 3rd party subscription):
-   - quotes_get_stock_quote: Get quote for a single stock
-   - quotes_get_stock_quotes_batch: Get quotes for multiple stocks
-   - quotes_get_options_quote: Get quote for an options contract
+Additional tools for quotes (require Financial Modeling Prep subscription):
+   - fmp_get_stock_quote: Get quote for a single stock
+   - fmp_get_stock_quotes_batch: Get quotes for multiple stocks
+   - fmp_get_events: Get economic calendar events
 
-Adding a new tool is very straighforward due to the simple project structure.
+Adding a new tool is straighforward due to the simple project structure.
 
-## Exposing the broker to LLMs - Are you serious?
+## I heard MCP is not secure
 
 The system is hosted locally entirely, using the `stdio` protocol for MCP, so none of the MCP servers are exposed direclty. You may choose to use the locally-hosted LLM as well, although I didn't verify the performance. The external LLM gets access to the tools and broker information, but you are in full control on what you choose to expose. Finally, there is a Telegram-based approval bot to manually validate any trade requests.
 
@@ -38,6 +38,7 @@ Summarizing, here are the security controls:
 1. **Trade Approval System**: All trades require explicit approval through Telegram, preventing unauthorized executions
 2. **Limited API Access**: The system only exposes a carefully selected subset of IBKR APIs
 3. **Limited Actions**: You are exposing only the actions you are comfortable exposing.
+
 
 ## Does it work?
 

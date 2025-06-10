@@ -3,7 +3,7 @@
 from loguru import logger
 from fastmcp import FastMCP
 
-from src.mcp_servers import ibkr, quotes, calendar
+from src.mcp_servers import ibkr, fmp, calendar
 
 main_mcp = FastMCP(
   name="main_mcp",
@@ -11,7 +11,7 @@ main_mcp = FastMCP(
 )
 
 main_mcp.mount("ibkr", ibkr)
-main_mcp.mount("quotes", quotes)
+main_mcp.mount("fmp", fmp)
 main_mcp.mount("calendar", calendar)
 
 if __name__ == "__main__":

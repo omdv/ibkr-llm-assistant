@@ -1,21 +1,21 @@
-
 """MCP server setup."""
 from loguru import logger
 from fastmcp import FastMCP
+import json
 
 from src.utilities import setup_logging
-from src.quote_helpers.fmp_quotes_helper import FMPQuoteFetcher
-from src.quote_helpers.yahoo_quotes_helper import YahooQuoteFetcher
+from src.fmp_helpers.fmp_quotes_helper import FMPQuoteFetcher
+from src.fmp_helpers.fmp_events_helper import FMPEventsFetcher
 
 setup_logging()
 
-quotes = FastMCP("quotes")
+fmp = FastMCP("fmp")
 
 # Initialize shared interfaces
 fmp_quotes = FMPQuoteFetcher()
-yahoo_quotes = YahooQuoteFetcher()
+fmp_events = FMPEventsFetcher()
 
-@quotes.tool(name="get_stock_quote")
+@fmp.tool(name="get_stock_quote")
 async def get_stock_quote(symbol: str) -> str:
   """Get quote for a stock symbol.
 
@@ -45,7 +45,7 @@ async def get_stock_quote(symbol: str) -> str:
     return result
 
 
-@quotes.tool(name="get_stock_quotes_batch")
+@fmp.tool(name="get_stock_quotes_batch")
 async def get_stock_quotes_batch(symbols: list[str]) -> str:
   """Get quotes for a list of stock symbols.
 
@@ -73,28 +73,37 @@ async def get_stock_quotes_batch(symbols: list[str]) -> str:
     return response
 
 
-@quotes.tool(name="get_options_quote")
-async def get_options_quote(symbol: str) -> str:
-  """Get options quote for an options symbol by parsing Yahoo Finance page.
+@fmp.tool(name="get_events")
+async def get_events(from_date: str, to_date: str) -> str:
+  """Get economic events for a given date range in the server's timezone.
 
   Args:
-    symbol (str): The options symbol to get the quote for.
+    from_date (str): The start date of the calendar.
+    to_date (str): The end date of the calendar.
+    impact (list[str]): The impact of the events, "High", "Medium", "Low"
+    countries (list[str]): The countries of the events, two letter ISO codes
 
   Returns:
-    str: A formatted string containing the quote for the options symbol.
+    str: JSON string containing the events for given date range in server's timezone.
 
   Example:
-      >>> await get_options_quote("SPXW250421P05050000")
-      "The current price of SPXW250421P05050000 is 150.75."
+      >>> await get_events("2025-06-09", "2025-06-10")
+      '[{"date": "2025-06-09", "event": "CPI", "impact": "High", "country": "US"}]'
+      >>> await get_events("2025-06-09", "2025-06-10", impact=["High"], countries=["US"])
+      '[{"date": "2025-06-09", "event": "CPI", "impact": "High", "country": "US"}]'
 
   """
-  logger.debug("Tool get_options_quote called with symbol: {!s}", symbol)
+  logger.debug(
+    "Tool get_events called with from_date: {!s} and to_date: {!s}",
+    from_date,
+    to_date,
+  )
   try:
-    quote = await yahoo_quotes.get_options_quote(symbol)
-    result = f"The current price of {symbol} is {quote}."
-    logger.debug("get_options_quote result: {!s}", result)
+    events = await fmp_events.get_events(from_date, to_date)
+    result = json.dumps(events)
+    logger.debug("get_events result: {!s}", result)
   except Exception as e:
-    logger.error("Error in get_options_quote: {!s}", str(e))
-    return "Error getting options quote"
+    logger.error("Error in get_events: {!s}", str(e))
+    return "Error getting events"
   else:
     return result
