@@ -1,10 +1,6 @@
-"""Test script for MCP agent."""
-
-import asyncio
-import logging
+"""Define the MCP application."""
 
 from mcp_agent.app import MCPApp
-from mcp_agent.agents.agent import Agent
 from mcp_agent.config import (
   Settings,
   LoggerSettings,
@@ -12,14 +8,12 @@ from mcp_agent.config import (
   MCPServerSettings,
   AnthropicSettings,
 )
-from mcp_agent.workflows.llm.augmented_llm import RequestParams
-from mcp_agent.workflows.llm.augmented_llm_anthropic import AnthropicAugmentedLLM
-from settings import MCPAgentSettings
 
-config = MCPAgentSettings()
-logger = logging.getLogger(__name__)
+from settings import MySettings
 
-app = MCPApp(
+config = MySettings()
+
+my_app = MCPApp(
   name="calendar_test",
   settings=Settings(
     execution_engine="asyncio",
@@ -66,38 +60,3 @@ app = MCPApp(
     ),
   ),
 )
-
-async def run() -> str:
-  """Run the MCP agent."""
-  async with app.run():
-    agent = Agent(
-      name="calendar_agent",
-      instruction="""
-      You are a helpful assistant that supports the trading of stocks and options.
-      You can access the calendar to get today's date and exchange sessions.
-      You can access the financial modeling prep server to get the important upcoming events.
-      You can access the IBKR server to get the current positions and to place trades.
-      """,
-      server_names=["calendar", "fmp", "ibkr"],
-    )
-
-    llm = AnthropicAugmentedLLM(agent)
-    return await llm.generate_str(
-      "List all available tools, then get the price of SPX and get my positions",
-      request_params=RequestParams(maxTokens=1024),
-    )
-
-def main() -> None:
-  """Run the MCP agent."""
-  loop = asyncio.new_event_loop()
-  try:
-    asyncio.set_event_loop(loop)
-    result = loop.run_until_complete(run())
-    print("\nResult:", result)
-  except Exception as e:
-    logger.exception("Error during execution", exc_info=e)
-  finally:
-    loop.close()
-
-if __name__ == "__main__":
-  main()

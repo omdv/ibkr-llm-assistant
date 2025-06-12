@@ -1,7 +1,7 @@
 """Settings for the MCP client."""
 from pydantic_settings import BaseSettings
 
-class MCPAgentSettings(BaseSettings):
+class MySettings(BaseSettings):
   """Configuration settings for the MCP client."""
 
   # application settings
