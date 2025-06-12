@@ -6,10 +6,10 @@ from .positions import PositionClient
 from .trading import TradingClient
 
 class IBInterface(
-    MarketDataClient,
-    ContractClient,
-    ScannerClient,
-    PositionClient,
-    TradingClient,
+  MarketDataClient,
+  ContractClient,
+  ScannerClient,
+  PositionClient,
+  TradingClient,
 ):
-    """Main IB interface combining all functionality."""
+  """Main IB interface combining all functionality."""

@@ -1,15 +1,13 @@
 """MCP Calendar server."""
 
-import json
 import pytz
 import pandas as pd
 import exchange_calendars as xcals
 from datetime import datetime
 from fastmcp import FastMCP
+from loguru import logger
 
-from src.utilities import setup_logging, Settings
-
-setup_logging()
+from servers.calendar.settings import Settings
 
 calendar = FastMCP("calendar")
 
@@ -54,3 +52,10 @@ async def get_calendar(num_days: int = 5) -> str:
   schedule["close"] = schedule["close"].dt.strftime("%Y-%m-%d %H:%M:%S")
 
   return schedule.to_json(orient="records")
+
+if __name__ == "__main__":
+  try:
+    calendar.run(transport="stdio")
+  except Exception as e:
+    logger.error("MCP server error: {}", str(e))
+    raise

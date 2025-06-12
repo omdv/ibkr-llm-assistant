@@ -11,9 +11,8 @@ from telegram.ext import (
   ContextTypes,
   CommandHandler,
 )
-from src.utilities import Settings, setup_logging
+from servers.ibkr.settings import Settings
 
-setup_logging()
 
 class TelegramApprovalBot:
   """Telegram bot for handling trade approvals."""

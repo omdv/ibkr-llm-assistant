@@ -1,14 +1,12 @@
 """MCP server setup."""
-from loguru import logger
-from fastmcp import FastMCP
+
 import json
+from fastmcp import FastMCP
+from loguru import logger
 
-from src.utilities import setup_logging
-from src.fmp_helpers.fmp_quotes_helper import FMPQuoteFetcher
-from src.fmp_helpers.fmp_events_helper import FMPEventsFetcher
+from servers.fmp.helpers import FMPQuoteFetcher, FMPEventsFetcher
 
-setup_logging()
-
+# Initialize server
 fmp = FastMCP("fmp")
 
 # Initialize shared interfaces
@@ -27,17 +25,15 @@ async def get_stock_quote(symbol: str) -> str:
     Index symbols should be prefixed with "^"
 
   Example:
-      >>> await get_stock_quote("AAPL")
+      >>> get_stock_quote("AAPL")
       "The current price of AAPL is 150.75."
-      >>> await get_stock_quote("^SPX")
+      >>> get_stock_quote("^SPX")
       "The current price of ^SPX is 4500.00."
 
   """
-  logger.debug("Tool get_stock_quote called with symbol: {!s}", symbol)
   try:
     quote = await fmp_quotes.get_spot_quote(symbol, "price")
     result = f"The current price of {symbol} is {quote}."
-    logger.debug("get_quote result: {!s}", result)
   except Exception as e:
     logger.error("Error in get_quote: {!s}", str(e))
     return "Error getting quote"
@@ -56,16 +52,14 @@ async def get_stock_quotes_batch(symbols: list[str]) -> str:
     str: A formatted string containing the quotes for the stock symbols.
 
   Example:
-      >>> await get_stock_quotes_batch(["AAPL", "MSFT"])
+      >>> get_stock_quotes_batch(["AAPL", "MSFT"])
       "Current Stock Quotes: {'AAPL': 150.75, 'MSFT': 210.22}"
 
   """
-  logger.debug("Tool get_stock_quotes_batch called with symbols: {!s}", symbols)
   try:
     quotes = await fmp_quotes.get_batch_quotes(symbols)
     # Create a formatted table string
     response = f"Current Stock Quotes: {quotes}"
-    logger.debug("get_stock_quotes_batch result: {!s}", response)
   except Exception as e:
     logger.error("Error in get_stock_quotes_batch: {!s}", str(e))
     return "Error getting stock quotes"
@@ -76,6 +70,7 @@ async def get_stock_quotes_batch(symbols: list[str]) -> str:
 @fmp.tool(name="get_events")
 async def get_events(from_date: str, to_date: str) -> str:
   """Get economic events for a given date range in the server's timezone.
+  You need to specify filters for impact and countries otherwise you will get overloaded.
 
   Args:
     from_date (str): The start date of the calendar.
@@ -87,23 +82,24 @@ async def get_events(from_date: str, to_date: str) -> str:
     str: JSON string containing the events for given date range in server's timezone.
 
   Example:
-      >>> await get_events("2025-06-09", "2025-06-10")
+      >>> get_events("2025-06-09", "2025-06-10")
       '[{"date": "2025-06-09", "event": "CPI", "impact": "High", "country": "US"}]'
-      >>> await get_events("2025-06-09", "2025-06-10", impact=["High"], countries=["US"])
+      >>> get_events("2025-06-09", "2025-06-10", impact=["High"], countries=["US"])
       '[{"date": "2025-06-09", "event": "CPI", "impact": "High", "country": "US"}]'
 
   """
-  logger.debug(
-    "Tool get_events called with from_date: {!s} and to_date: {!s}",
-    from_date,
-    to_date,
-  )
   try:
     events = await fmp_events.get_events(from_date, to_date)
     result = json.dumps(events)
-    logger.debug("get_events result: {!s}", result)
   except Exception as e:
     logger.error("Error in get_events: {!s}", str(e))
     return "Error getting events"
   else:
     return result
+
+if __name__ == "__main__":
+  try:
+    fmp.run(transport="stdio")
+  except Exception as e:
+    logger.error("MCP server error: {}", str(e))
+    raise

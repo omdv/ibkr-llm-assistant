@@ -4,6 +4,7 @@
   packages = with pkgs; [
     git
     busybox
+    nodejs_22
   ];
 
   languages.python = {

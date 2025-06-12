@@ -1,10 +1,8 @@
 """MCP server setup."""
 from fastmcp import FastMCP
 
-from src.utilities import setup_logging
-from src.ib_helper import IBInterface
+from servers.ibkr.helpers import IBInterface
 
-setup_logging()
 ibkr = FastMCP("ibkr")
 
 # Initialize shared interface

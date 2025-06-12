@@ -1,6 +1,6 @@
 """Scanner-related tools."""
 from loguru import logger
-from src.mcp_servers.ibkr import ibkr, ib_interface
+from servers.ibkr.tools import ibkr, ib_interface
 
 @ibkr.tool(name="get_scanner_instrument_codes")
 async def get_scanner_instrument_codes() -> str:
@@ -16,10 +16,8 @@ async def get_scanner_instrument_codes() -> str:
       "The scanner instrument codes are: ['STK', 'FUT', 'OPT']"
 
   """
-  logger.debug("Tool get_scanner_instrument_codes called")
   try:
     tags = await ib_interface.get_scanner_instrument_codes()
-    logger.debug("Scanner instrument codes: {!s}", tags)
   except Exception as e:
     logger.error("Error in get_scanner_instrument_codes: {!s}", str(e))
     return "Error getting scanner instrument codes"
@@ -40,10 +38,8 @@ async def get_scanner_location_codes() -> str:
       "The scanner location codes are: ['STK.US', 'STK.EU']"
 
   """
-  logger.debug("Tool get_scanner_location_codes called")
   try:
     tags = await ib_interface.get_scanner_location_codes()
-    logger.debug("Scanner location codes: {!s}", tags)
   except Exception as e:
     logger.error("Error in get_scanner_location_codes: {!s}", str(e))
     return "Error getting scanner location codes"
@@ -64,10 +60,8 @@ async def get_scanner_filter_codes() -> str:
       "The scanner filter codes are: ['priceAbove', 'marketCapAbove']"
 
   """
-  logger.debug("Tool get_scanner_filter_codes called")
   try:
     tags = await ib_interface.get_scanner_filter_codes()
-    logger.debug("Scanner filter codes: {!s}", tags)
   except Exception as e:
     logger.error("Error in get_scanner_filter_codes: {!s}", str(e))
     return "Error getting scanner filter codes"
@@ -103,19 +97,12 @@ async def get_scanner_results(
       "I have found 25 stocks that match the scanner parameters: ['AAPL', 'MSFT', ...]"
 
   """
-  logger.debug(
-    "Tool get_scanner_results called with parameters: {!s}, {!s}, {!s}",
-    instrument_code,
-    location_code,
-    filter_codes,
-  )
   try:
     results = await ib_interface.get_scanner_results(
       instrument_code,
       location_code,
       filter_codes,
     )
-    logger.debug("Scanner results: {!s}", results)
   except Exception as e:
     logger.error("Error in get_scanner_results: {!s}", str(e))
     return "Error getting scanner results"

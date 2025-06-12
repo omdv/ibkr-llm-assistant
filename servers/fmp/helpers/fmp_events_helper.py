@@ -4,9 +4,8 @@ import httpx
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from loguru import logger
-from src.utilities import setup_logging, Settings
 
-setup_logging()
+from servers.fmp.settings import Settings
 
 class FMPEventsError(Exception):
   """Custom exception for FMP events errors."""
@@ -88,7 +87,7 @@ class FMPEventsFetcher:
 
       # Set defaults if not provided
       impact = impact or ["High", "Medium"]
-      countries = countries or ["US", "GB", "CN", "EA"]
+      countries = countries or ["US", "EA"]
 
       # Filter and convert dates in each event to server timezone
       filtered_data = [

@@ -1,6 +1,6 @@
 """Contract and options-related tools."""
 from loguru import logger
-from src.mcp_servers.ibkr import ibkr, ib_interface
+from servers.ibkr.tools import ibkr, ib_interface
 
 @ibkr.tool(name="get_contract_details")
 async def get_contract_details(
@@ -36,7 +36,6 @@ async def get_contract_details(
       'exchange': 'NASDAQ'}"
 
   """
-  logger.debug("Tool get_contract_details called with symbol: {!s}", symbol)
   try:
     options = options or {}
     details = await ib_interface.get_contract_details(
@@ -45,7 +44,6 @@ async def get_contract_details(
       exchange=exchange,
       options=options,
     )
-    logger.debug("Contract details: {!s}", details)
   except Exception as e:
     logger.error("Error in get_contract_details: {!s}", str(e))
     return "Error getting contract details"
@@ -100,13 +98,6 @@ async def get_options_chain(
     ]"
 
   """
-  logger.debug(
-    "Tool get_options_chain called with parameters: {!s}, {!s}, {!s}, {!s}",
-    underlying_symbol,
-    underlying_sec_type,
-    underlying_con_id,
-    filters,
-  )
   try:
     options_chain = await ib_interface.get_options_chain(
       underlying_symbol,
@@ -114,7 +105,6 @@ async def get_options_chain(
       underlying_con_id,
       filters,
     )
-    logger.debug("Options chain: {!s}", options_chain)
   except Exception as e:
     logger.error("Error in get_options_chain: {!s}", str(e))
     return "Error getting options chain"
@@ -142,10 +132,8 @@ async def get_tickers(contract_ids: list[int]) -> str:
       ]"
 
   """
-  logger.debug("Tool get_tickers called with contract_ids: {!s}", contract_ids)
   try:
     tickers = await ib_interface.get_tickers(contract_ids)
-    logger.debug("Tickers: {!s}", tickers)
   except Exception as e:
     logger.error("Error in get_tickers: {!s}", str(e))
     return "Error getting tickers"
@@ -198,14 +186,6 @@ async def get_and_filter_options_chain(
     ]"
 
   """
-  logger.debug(
-    "Tool get_and_filter_options called with parameters: {!s}, {!s}, {!s}, {!s}, {!s}",
-    underlying_symbol,
-    underlying_sec_type,
-    underlying_con_id,
-    filters,
-    criteria,
-  )
   try:
     filtered_options = await ib_interface.get_and_filter_options(
       underlying_symbol,
@@ -214,7 +194,6 @@ async def get_and_filter_options_chain(
       filters,
       criteria,
     )
-    logger.debug("Filtered options: {!s}", filtered_options)
   except Exception as e:
     logger.error("Error in filter_options: {!s}", str(e))
     return "Error filtering options"

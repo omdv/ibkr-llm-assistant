@@ -1,7 +1,7 @@
 """Trading-related tools."""
 from loguru import logger
 import json
-from src.mcp_servers.ibkr import ibkr, ib_interface
+from servers.ibkr.tools import ibkr, ib_interface
 
 @ibkr.tool(name="trade_simple_contract")
 async def trade_simple_contract(
@@ -31,14 +31,6 @@ async def trade_simple_contract(
     "Order executed"
 
   """
-  logger.debug(
-    "Tool trade_single_instrument called with parameters: {!s}, {!s}, {!s}, {!s}, {!s}",
-    con_id,
-    action,
-    order_type,
-    quantity,
-    price,
-  )
   try:
     result = await ib_interface.trade_simple_contract(
       con_id=con_id,
@@ -47,7 +39,6 @@ async def trade_simple_contract(
       order_type=order_type,
       price=price,
     )
-    logger.debug("Order result: {!s}", result)
 
     trade_data = json.loads(result) if isinstance(result, str) else result
     if trade_data.get("error"):
@@ -99,14 +90,6 @@ async def trade_combo_contract(
     "Order executed"
 
   """
-  logger.debug(
-    "Tool trade_combo_contract called with parameters: {!s}, {!s}, {!s}, {!s}, {!s}",
-    legs,
-    action,
-    quantity,
-    order_type,
-    price,
-  )
   try:
     result = await ib_interface.trade_combo_contract(
       legs,
@@ -115,7 +98,6 @@ async def trade_combo_contract(
       order_type,
       price,
     )
-    logger.debug("Order result: {!s}", result)
 
     trade_data = json.loads(result) if isinstance(result, str) else result
     if trade_data.get("error"):

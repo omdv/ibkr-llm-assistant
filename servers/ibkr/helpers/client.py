@@ -3,9 +3,8 @@ import asyncio
 import datetime as dt
 from loguru import logger
 from ib_async import IB
-from src.utilities import Settings, setup_logging
 
-setup_logging()
+from servers.ibkr.settings import Settings
 
 class IBClient:
   """Base IB client connection handling. No public methods."""

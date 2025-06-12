@@ -4,9 +4,7 @@ import json
 import httpx
 from loguru import logger
 
-from src.utilities import setup_logging, Settings
-
-setup_logging()
+from servers.fmp.settings import Settings
 
 class FMPQuoteError(Exception):
   """Custom exception for FMP quote errors."""

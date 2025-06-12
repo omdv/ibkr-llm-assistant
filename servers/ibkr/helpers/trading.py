@@ -4,8 +4,9 @@ import json
 from loguru import logger
 from ib_async.contract import Contract, ComboLeg
 from ib_async.order import Order
+
 from .client import IBClient
-from src.utilities import TelegramApprovalBot
+from servers.ibkr.utilities import TelegramApprovalBot
 
 class TradingClient(IBClient):
   """Trading operations.
