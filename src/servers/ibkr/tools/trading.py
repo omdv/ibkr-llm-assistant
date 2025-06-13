@@ -1,7 +1,7 @@
 """Trading-related tools."""
 from loguru import logger
 import json
-from servers.ibkr.tools import ibkr, ib_interface
+from src.servers.ibkr.tools import ibkr, ib_interface
 
 @ibkr.tool(name="trade_simple_contract")
 async def trade_simple_contract(

@@ -11,7 +11,7 @@ from telegram.ext import (
   ContextTypes,
   CommandHandler,
 )
-from servers.ibkr.settings import Settings
+from src.servers.ibkr.settings import Settings
 
 
 class TelegramApprovalBot:

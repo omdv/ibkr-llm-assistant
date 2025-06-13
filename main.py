@@ -1,58 +1,58 @@
 """Entry point for the MCP client application."""
 import asyncio
 import argparse
-import uvicorn
 from rich.console import Console
-from src.utilities import Settings
-from src.application import RichApp
 
-from mcp_client import MCPClient
+from src.run_agent import run_agent
+from src.run_chat import run_chat
+from src.run_prompt import run_prompt
 
-async def main() -> None:
+def main() -> None:
   """Launch the application."""
   parser = argparse.ArgumentParser(description="IBKR MCP Client")
-  parser.add_argument(
-    "--query",
-    type=str,
-    help="Run a single prompt and exit")
   parser.add_argument(
     "--cli",
     action="store_true",
     help="Chat with LLM in the CLI")
   parser.add_argument(
-    "--web",
+    "--agent",
     action="store_true",
-    help="Run scheduled prompts in the web interface")
+    help="Run the MCP agent")
+  parser.add_argument(
+    "--prompt",
+    type=str,
+    help="Run the MCP prompt")
 
   args = parser.parse_args()
-
-  # If no arguments provided, show help
-  if len(vars(args)) == 0:
+  if not any(vars(args).values()):
     parser.print_help()
     return
 
-  settings = Settings()
-  mcp_client = MCPClient(settings)
+  loop = asyncio.get_event_loop()
+  main_task = None
 
-  if args.query:
-    await mcp_client.connect_to_server()
-    result = await mcp_client.process_query(args.query)
-    Console().print(result)
-    await mcp_client.cleanup()
-  elif args.cli:
-    app = RichApp(mcp_client)
-    await app.run()
-    await mcp_client.cleanup()
-  elif args.web:
-    uvicorn.run(
-      "src.web.app:app",
-      host="127.0.0.1",
-      port=settings.web_port,
-      reload=True,
-      reload_dirs=["src/web"],
-    )
-  else:
-    parser.print_help()
+  try:
+    if args.cli:
+      main_task = loop.create_task(run_chat())
+    if args.agent:
+      main_task = loop.create_task(run_agent())
+    if args.prompt:
+      main_task = loop.create_task(run_prompt(args.prompt))
+
+    if main_task:
+      loop.run_until_complete(main_task)
+  except KeyboardInterrupt:
+    Console().print("\n[bold yellow]Keyboard interrupt. Shutting down...[/bold yellow]")
+  finally:
+    if main_task:
+      main_task.cancel()
+
+    tasks = asyncio.all_tasks(loop=loop)
+    [task.cancel() for task in tasks]
+
+    group = asyncio.gather(*tasks, return_exceptions=True)
+    loop.run_until_complete(group)
+    loop.close()
 
 if __name__ == "__main__":
-  asyncio.run(main())
+  main()

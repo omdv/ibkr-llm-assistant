@@ -9,7 +9,7 @@ from mcp_agent.config import (
   AnthropicSettings,
 )
 
-from settings import MySettings
+from src.settings import MySettings
 
 config = MySettings()
 
@@ -26,14 +26,14 @@ my_app = MCPApp(
       servers={
         "calendar": MCPServerSettings(
           command="python",
-          args=["-m", "servers.calendar.server"],
+          args=["-m", "src.servers.calendar.server"],
           env={
             "SERVER_TIMEZONE": config.server_timezone,
           },
         ),
         "fmp": MCPServerSettings(
           command="python",
-          args=["-m", "servers.fmp.server"],
+          args=["-m", "src.servers.fmp.server"],
           env={
             "SERVER_TIMEZONE": config.server_timezone,
             "QUOTES_API_KEY": config.quotes_api_key,
@@ -41,7 +41,7 @@ my_app = MCPApp(
         ),
         "ibkr": MCPServerSettings(
           command="python",
-          args=["-m", "servers.ibkr.server"],
+          args=["-m", "src.servers.ibkr.server"],
           env={
             "IB_GATEWAY_HOST": config.ib_gateway_host,
             "IB_GATEWAY_PORT": config.ib_gateway_port,

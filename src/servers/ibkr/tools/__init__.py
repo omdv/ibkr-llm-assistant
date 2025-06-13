@@ -1,7 +1,7 @@
 """MCP server setup."""
 from fastmcp import FastMCP
 
-from servers.ibkr.helpers import IBInterface
+from src.servers.ibkr.helpers import IBInterface
 
 ibkr = FastMCP("ibkr")
 

@@ -6,7 +6,7 @@ from ib_async.contract import Contract, ComboLeg
 from ib_async.order import Order
 
 from .client import IBClient
-from servers.ibkr.utilities import TelegramApprovalBot
+from src.servers.ibkr.utilities import TelegramApprovalBot
 
 class TradingClient(IBClient):
   """Trading operations.

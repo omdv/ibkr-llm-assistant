@@ -5,7 +5,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from loguru import logger
 
-from servers.fmp.settings import Settings
+from src.servers.fmp.settings import Settings
 
 class FMPEventsError(Exception):
   """Custom exception for FMP events errors."""

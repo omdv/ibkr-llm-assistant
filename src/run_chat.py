@@ -2,13 +2,13 @@
 
 import asyncio
 from loguru import logger
-
 from rich.console import Console
-from mcp_agent.app import MCPApp
+from rich.panel import Panel
+
 from mcp_agent.agents.agent import Agent
 from mcp_agent.workflows.llm.augmented_llm_anthropic import AnthropicAugmentedLLM
 
-from mcp_app import my_app
+from src.mcp_app import my_app
 
 # Agent definition remains the same.
 chat_agent = Agent(
@@ -20,11 +20,9 @@ chat_agent = Agent(
   server_names=["calendar", "fmp", "ibkr"],
 )
 
-# The core chat logic is now clean and simple.
-# It has no responsibility for shutdown; it just runs the chat.
-async def chat_run(app: MCPApp) -> None:
+async def run_chat() -> None:
   """Run the main chat agent loop."""
-  async with app.run():
+  async with my_app.run():
     llm = await chat_agent.attach_llm(AnthropicAugmentedLLM)
     llm.memory = True
 
@@ -45,31 +43,10 @@ async def chat_run(app: MCPApp) -> None:
           continue
 
         result = await llm.generate_str(message=query)
-        Console().print(f"\n[cyan]Assistant:[/cyan] {result}")
+        Console().print(Panel(result, title="Assistant", border_style="cyan"))
 
       except (KeyboardInterrupt, EOFError):
         break
       except Exception as e:
         logger.exception("Error during chat interaction", exc_info=e)
         Console().print("[bold red]An error occurred. Please try again.[/bold red]")
-
-
-if __name__ == "__main__":
-  loop = asyncio.get_event_loop()
-  main_task = None
-
-  try:
-    main_task = loop.create_task(chat_run(my_app))
-    loop.run_until_complete(main_task)
-  except KeyboardInterrupt:
-    Console().print("\n[bold yellow]Keyboard interrupt. Shutting down...[/bold yellow]")
-  finally:
-    # gracefully shutdown the chat
-    if main_task:
-      main_task.cancel()
-    tasks = asyncio.all_tasks(loop=loop)
-    for task in tasks:
-      task.cancel()
-    group = asyncio.gather(*tasks, return_exceptions=True)
-    loop.run_until_complete(group)
-    loop.close()

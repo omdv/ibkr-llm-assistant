@@ -7,7 +7,7 @@ from datetime import datetime
 from fastmcp import FastMCP
 from loguru import logger
 
-from servers.calendar.settings import Settings
+from src.servers.calendar.settings import Settings
 
 calendar = FastMCP("calendar")
 

@@ -4,7 +4,7 @@ import json
 from fastmcp import FastMCP
 from loguru import logger
 
-from servers.fmp.helpers import FMPQuoteFetcher, FMPEventsFetcher
+from src.servers.fmp.helpers import FMPQuoteFetcher, FMPEventsFetcher
 
 # Initialize server
 fmp = FastMCP("fmp")
