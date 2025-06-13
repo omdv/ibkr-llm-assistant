@@ -5,7 +5,6 @@ class MySettings(BaseSettings):
   """Configuration settings for the MCP client."""
 
   # application settings
-  verbose_level: str = "DEBUG"
   database_host: str = "localhost"
   database_port: int = 5432
   web_port: int = 8000

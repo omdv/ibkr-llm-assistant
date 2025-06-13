@@ -11,7 +11,7 @@ def main() -> None:
   """Launch the application."""
   parser = argparse.ArgumentParser(description="IBKR MCP Client")
   parser.add_argument(
-    "--cli",
+    "--chat",
     action="store_true",
     help="Chat with LLM in the CLI")
   parser.add_argument(
@@ -32,7 +32,7 @@ def main() -> None:
   main_task = None
 
   try:
-    if args.cli:
+    if args.chat:
       main_task = loop.create_task(run_chat())
     if args.agent:
       main_task = loop.create_task(run_agent())

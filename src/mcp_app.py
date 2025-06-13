@@ -3,7 +3,6 @@
 from mcp_agent.app import MCPApp
 from mcp_agent.config import (
   Settings,
-  LoggerSettings,
   MCPSettings,
   MCPServerSettings,
   AnthropicSettings,
@@ -16,12 +15,6 @@ config = MySettings()
 my_app = MCPApp(
   name="calendar_test",
   settings=Settings(
-    execution_engine="asyncio",
-    logger=LoggerSettings(
-      transports=["console", "file"],
-      level=config.verbose_level,
-      path="logs/mcp-agent.jsonl",
-    ),
     mcp=MCPSettings(
       servers={
         "calendar": MCPServerSettings(
