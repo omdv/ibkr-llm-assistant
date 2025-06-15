@@ -15,8 +15,9 @@ async def ibkr_agent_run(app: MCPApp) -> str:
       You can access the calendar to get today's date and exchange sessions.
       You can access the 3rd party financial APIs to get the upcoming economic events.
       You can access the IBKR server to get the current positions and to place trades.
+      You can access the Telegram server to send messages to the user.
       """,
-      server_names=["calendar", "fmp", "ibkr"],
+      server_names=["calendar", "fmp", "ibkr", "telegram"],
     )
 
     llm = AnthropicAugmentedLLM(agent)

@@ -24,6 +24,14 @@ my_app = MCPApp(
             "SERVER_TIMEZONE": config.server_timezone,
           },
         ),
+        "telegram": MCPServerSettings(
+          command="python",
+          args=["-m", "src.servers.telegram.server"],
+          env={
+            "TELEGRAM_BOT_TOKEN": config.telegram_bot_token,
+            "TELEGRAM_ALLOWED_USER_ID": config.telegram_allowed_user_id,
+          },
+        ),
         "fmp": MCPServerSettings(
           command="python",
           args=["-m", "src.servers.fmp.server"],

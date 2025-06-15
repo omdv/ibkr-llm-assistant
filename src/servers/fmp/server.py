@@ -70,7 +70,9 @@ async def get_stock_quotes_batch(symbols: list[str]) -> str:
 @fmp.tool(name="get_events")
 async def get_events(from_date: str, to_date: str) -> str:
   """Get economic events for a given date range in the server's timezone.
-  You need to specify filters for impact and countries otherwise you will get overloaded.
+
+  You need to specify filters for impact and countries
+  otherwise you will get overloaded.
 
   Args:
     from_date (str): The start date of the calendar.

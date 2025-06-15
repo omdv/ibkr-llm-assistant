@@ -17,7 +17,7 @@ chat_agent = Agent(
   You are a helpful assistant that supports the trading of stocks and options.
   You have a set of tools that you can use to help the user.
   """,
-  server_names=["calendar", "fmp", "ibkr"],
+  server_names=["calendar", "fmp", "ibkr", "telegram"],
 )
 
 async def run_chat() -> None:
