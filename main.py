@@ -3,25 +3,20 @@ import asyncio
 import argparse
 from rich.console import Console
 
-from src.run_agent import run_agent
 from src.run_chat import run_chat
 from src.run_prompt import run_prompt
 
 def main() -> None:
   """Launch the application."""
-  parser = argparse.ArgumentParser(description="IBKR MCP Client")
+  parser = argparse.ArgumentParser(description="IBKR LLM Assistant")
+  parser.add_argument(
+    "--prompt",
+    type=str,
+    help="Run the prompt")
   parser.add_argument(
     "--chat",
     action="store_true",
     help="Chat with LLM in the CLI")
-  parser.add_argument(
-    "--agent",
-    action="store_true",
-    help="Run the MCP agent")
-  parser.add_argument(
-    "--prompt",
-    type=str,
-    help="Run the MCP prompt")
 
   args = parser.parse_args()
   if not any(vars(args).values()):
@@ -34,8 +29,6 @@ def main() -> None:
   try:
     if args.chat:
       main_task = loop.create_task(run_chat())
-    if args.agent:
-      main_task = loop.create_task(run_agent())
     if args.prompt:
       main_task = loop.create_task(run_prompt(args.prompt))
 

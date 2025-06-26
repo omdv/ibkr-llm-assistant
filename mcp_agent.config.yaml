@@ -1,5 +1,5 @@
 execution_engine: asyncio
 logger:
   transports: [console, file]
-  level: debug
+  level: warning
   path: "logs/mcp-agent.jsonl"

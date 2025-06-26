@@ -7,7 +7,7 @@ class MySettings(BaseSettings):
   # application settings
   database_host: str = "localhost"
   database_port: int = 5432
-  web_port: int = 8000
+  web_port: int = 3000
 
   # MCP server settings
   server_timezone: str = "America/New_York"

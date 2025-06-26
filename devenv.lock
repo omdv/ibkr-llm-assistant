@@ -3,10 +3,10 @@
     "devenv": {
       "locked": {
         "dir": "src/modules",
-        "lastModified": 1748361913,
+        "lastModified": 1750615580,
         "owner": "cachix",
         "repo": "devenv",
-        "rev": "b510085f1ca92779782d1e3de631b2292a30edb2",
+        "rev": "e5dfaa34eed24f1ec79e99624666b15f51c4be97",
         "type": "github"
       },
       "original": {
@@ -31,10 +31,31 @@
         "type": "github"
       }
     },
+    "git-hooks": {
+      "inputs": {
+        "flake-compat": "flake-compat",
+        "gitignore": "gitignore",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1750684550,
+        "owner": "cachix",
+        "repo": "git-hooks.nix",
+        "rev": "fae816c55a75675f30d18c9cbdecc13b970d95d4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cachix",
+        "repo": "git-hooks.nix",
+        "type": "github"
+      }
+    },
     "gitignore": {
       "inputs": {
         "nixpkgs": [
-          "pre-commit-hooks",
+          "git-hooks",
           "nixpkgs"
         ]
       },
@@ -53,10 +74,10 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1746807397,
+        "lastModified": 1750441195,
         "owner": "cachix",
         "repo": "devenv-nixpkgs",
-        "rev": "c5208b594838ea8e6cca5997fbf784b7cca1ca90",
+        "rev": "0ceffe312871b443929ff3006960d29b120dc627",
         "type": "github"
       },
       "original": {
@@ -66,32 +87,14 @@
         "type": "github"
       }
     },
-    "pre-commit-hooks": {
-      "inputs": {
-        "flake-compat": "flake-compat",
-        "gitignore": "gitignore",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1747372754,
-        "owner": "cachix",
-        "repo": "pre-commit-hooks.nix",
-        "rev": "80479b6ec16fefd9c1db3ea13aeb038c60530f46",
-        "type": "github"
-      },
-      "original": {
-        "owner": "cachix",
-        "repo": "pre-commit-hooks.nix",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "devenv": "devenv",
+        "git-hooks": "git-hooks",
         "nixpkgs": "nixpkgs",
-        "pre-commit-hooks": "pre-commit-hooks"
+        "pre-commit-hooks": [
+          "git-hooks"
+        ]
       }
     }
   },
